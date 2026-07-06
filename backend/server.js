@@ -204,6 +204,9 @@ app.post('/api/upload', authenticateToken, upload.single('presentation'), async 
         const newPresentation = {
           id: presentationId,
           title: req.file.originalname.replace(path.extname(req.file.originalname), '') || 'Untitled Presentation',
+          originalName: req.file.originalname,
+          size: req.file.size,
+          createdAt: new Date().toISOString(),
           slides
         };
 

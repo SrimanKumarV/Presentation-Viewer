@@ -37,109 +37,141 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Dynamic Background Glows */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] opacity-70 pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[150px] opacity-70 pointer-events-none" />
+    <div className="min-h-screen bg-background text-foreground flex relative overflow-hidden">
+      
+      {/* Cinematic Mesh Background */}
+      <div className="mesh-bg">
+        <div className="mesh-blob mesh-blob-1" />
+        <div className="mesh-blob mesh-blob-2" />
+        <div className="mesh-blob mesh-blob-3" />
+      </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="w-full max-w-md"
-      >
-        <div className="glass-card rounded-3xl p-8 shadow-2xl relative z-10 overflow-hidden">
-          {/* Subtle top gradient line */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
-
-          <div className="flex flex-col items-center mb-8">
-            <div className="p-3 bg-primary/10 rounded-2xl border border-primary/30 mb-4 glow-border">
-              <Presentation className="text-primary w-8 h-8" />
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white mb-1">
-              Nexus Viewer
-            </h1>
-            <p className="text-sm text-gray-400">
-              {isLogin ? 'Welcome back. Enter your portal.' : 'Create an account to host your presentations.'}
-            </p>
+      {/* Left Side: Branding (Hidden on small screens) */}
+      <div className="hidden lg:flex flex-1 flex-col justify-center px-20 relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+        >
+          <div className="p-4 bg-white/5 premium-glass rounded-2xl w-fit mb-8 border-white/10 glow-border-primary">
+            <Presentation className="text-white w-10 h-10" />
           </div>
+          <h1 className="text-6xl font-bold font-heading text-white mb-4 leading-tight">
+            The next era of <br/>
+            <span className="glow-text-primary text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+              presentations.
+            </span>
+          </h1>
+          <p className="text-lg text-gray-400 max-w-md">
+            Upload your slide decks and instantly transform them into hyper-fast, cloud-streamed interactive media players.
+          </p>
+        </motion.div>
+      </div>
 
-          {error && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }} 
-              animate={{ opacity: 1, scale: 1 }} 
-              className="mb-6 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center"
-            >
-              {error}
-            </motion.div>
-          )}
-
-          <form onSubmit={handleAuth} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-400 ml-1 uppercase tracking-wider">Email</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="w-4 h-4 text-gray-500" />
-                </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-surface/50 border border-border text-white rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-gray-600 shadow-inner"
-                  placeholder="you@example.com"
-                />
+      {/* Right Side: Auth Form */}
+      <div className="flex-1 flex items-center justify-center p-6 relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
+          className="w-full max-w-md"
+        >
+          <div className="premium-glass-heavy rounded-[2rem] p-10 relative overflow-hidden">
+            
+            <div className="lg:hidden flex flex-col items-center mb-8">
+              <div className="p-3 bg-white/5 rounded-2xl border border-white/10 mb-4 glow-border-primary">
+                <Presentation className="text-white w-8 h-8" />
               </div>
+              <h2 className="text-2xl font-bold text-white font-heading text-center">Nexus Viewer</h2>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-400 ml-1 uppercase tracking-wider">Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="w-4 h-4 text-gray-500" />
-                </div>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-surface/50 border border-border text-white rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-gray-600 shadow-inner"
-                  placeholder="••••••••"
-                />
-              </div>
+            <div className="mb-8 hidden lg:block">
+              <h2 className="text-3xl font-bold text-white font-heading mb-2">
+                {isLogin ? 'Welcome back' : 'Create an account'}
+              </h2>
+              <p className="text-gray-400 text-sm">
+                {isLogin ? 'Enter your details to access your dashboard.' : 'Sign up to start hosting your presentations.'}
+              </p>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full relative group overflow-hidden rounded-xl mt-4 bg-primary/20 hover:bg-primary/30 border border-primary/50 text-primary font-medium py-3 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  {isLogin ? <LogIn className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-                  {isLogin ? 'Sign In' : 'Create Account'}
-                </>
-              )}
-            </button>
-          </form>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }} 
+                animate={{ opacity: 1, height: 'auto' }} 
+                className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-200 text-sm flex items-center gap-2"
+              >
+                <div className="w-1.5 h-full bg-red-500 rounded-full" />
+                {error}
+              </motion.div>
+            )}
 
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setError(null);
-              }}
-              className="text-sm text-gray-400 hover:text-white transition-colors"
-            >
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-            </button>
+            <form onSubmit={handleAuth} className="space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-300 uppercase tracking-widest ml-1">Email</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Mail className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-black/20 premium-glass border border-white/10 text-white rounded-xl py-3.5 pl-12 pr-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder-gray-500 shadow-inner"
+                    placeholder="you@example.com"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-300 uppercase tracking-widest ml-1">Password</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Lock className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-black/20 premium-glass border border-white/10 text-white rounded-xl py-3.5 pl-12 pr-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder-gray-500 shadow-inner"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full relative group overflow-hidden rounded-xl mt-6 bg-white text-black font-semibold py-3.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    {isLogin ? <LogIn className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
+                    {isLogin ? 'Sign In' : 'Create Account'}
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-8 text-center border-t border-white/10 pt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setError(null);
+                }}
+                className="text-sm text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-2 w-full"
+              >
+                {isLogin ? "Don't have an account?" : "Already have an account?"}
+                <span className="text-primary font-medium">{isLogin ? 'Sign up' : 'Sign in'}</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }

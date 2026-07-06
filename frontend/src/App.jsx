@@ -1,14 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Navigate } from 'react-router-dom';
-import { Presentation, UploadCloud, Copy, Check, LogOut, Loader2, Play, Trash2, Share2, QrCode, X, Search } from 'lucide-react';
+import { Presentation, UploadCloud, Copy, Check, LogOut, Loader2, Play, Trash2, Share2, QrCode, X, Search, Info, FileText, Calendar, HardDrive } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import PresentationViewer from './components/PresentationViewer';
 import Auth from './pages/Auth';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { supabase } from './lib/supabase';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -36,6 +35,7 @@ function Dashboard() {
   const [presentations, setPresentations] = useState([]);
   const [loadingPresentations, setLoadingPresentations] = useState(true);
   const [activeQR, setActiveQR] = useState(null);
+  const [activeDetails, setActiveDetails] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -181,45 +181,62 @@ function Dashboard() {
     p.manifest?.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const formatSize = (bytes) => {
+    if (!bytes) return 'Unknown Size';
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(2)} MB`;
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Unknown Date';
+    return new Date(dateString).toLocaleString(undefined, { 
+      year: 'numeric', month: 'short', day: 'numeric', 
+      hour: '2-digit', minute: '2-digit' 
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground p-8 flex flex-col items-center relative overflow-hidden font-sans">
-      {/* Ambient Midnight Aurora Glows */}
-      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-primary/15 rounded-full blur-[140px] opacity-70 pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[800px] h-[800px] bg-secondary/10 rounded-full blur-[160px] opacity-70 pointer-events-none" />
-      <div className="absolute top-[40%] left-[30%] w-[400px] h-[400px] bg-accent/10 rounded-full blur-[120px] opacity-50 pointer-events-none" />
+      
+      {/* Cinematic Mesh Background */}
+      <div className="mesh-bg">
+        <div className="mesh-blob mesh-blob-1" />
+        <div className="mesh-blob mesh-blob-2" />
+        <div className="mesh-blob mesh-blob-3" />
+      </div>
 
       {/* Header */}
-      <header className="w-full max-w-6xl flex items-center justify-between py-6 mb-8 border-b border-white/5 relative z-10">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-xl border border-primary/30 glow-border">
-            <Presentation className="text-primary w-6 h-6" />
+      <header className="w-full max-w-6xl flex items-center justify-between py-6 mb-8 border-b border-white/10 relative z-10">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-white/5 rounded-2xl border border-white/10 premium-glass glow-border-primary">
+            <Presentation className="text-white w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white glow-text font-heading">
+          <h1 className="text-2xl font-bold tracking-tight text-white font-heading">
             Nexus Viewer
           </h1>
         </div>
         
         <div className="flex items-center gap-6">
           <div className="relative hidden md:block">
-            <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
             <input 
               type="text" 
               placeholder="Search presentations..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-surface/80 backdrop-blur border border-border rounded-full text-sm text-white focus:outline-none focus:border-primary/50 w-64 transition-all focus:w-80 shadow-inner"
+              className="pl-11 pr-4 py-2.5 premium-glass rounded-full text-sm text-white focus:outline-none focus:border-primary/50 w-64 transition-all focus:w-80 shadow-inner"
             />
           </div>
-          <div className="flex items-center gap-4 border-l border-border pl-6">
-            <div className="text-sm font-medium text-gray-400 hidden sm:block">
+          <div className="flex items-center gap-4 border-l border-white/10 pl-6">
+            <div className="text-sm font-medium text-gray-300 hidden sm:block">
               {user?.email}
             </div>
             <button 
               onClick={handleLogout}
-              className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-gray-400 hover:text-red-400 transition-colors"
+              className="p-2.5 premium-glass hover:bg-white/10 rounded-xl text-gray-400 hover:text-red-400 transition-colors"
               title="Log Out"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -232,17 +249,21 @@ function Dashboard() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card rounded-3xl p-10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8"
+            className="premium-glass-heavy rounded-[2rem] p-12 flex flex-col md:flex-row items-center justify-between gap-12"
           >
             <div className="flex-1 text-left">
-              <h2 className="text-3xl font-bold text-white font-heading mb-3">Host your next big idea.</h2>
-              <p className="text-gray-400 max-w-md text-lg">Upload PowerPoint presentations and instantly turn them into ultra-fast, cross-platform interactive media players.</p>
+              <h2 className="text-4xl font-bold text-white font-heading mb-4 leading-tight">
+                Host your next <span className="glow-text-primary text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">big idea.</span>
+              </h2>
+              <p className="text-gray-300 max-w-md text-lg leading-relaxed">
+                Upload PowerPoint presentations and instantly turn them into ultra-fast, cloud-streamed interactive media players.
+              </p>
             </div>
 
             <div className="flex-1 w-full max-w-md">
               <div 
                 onClick={!isUploading ? handleUploadClick : undefined}
-                className={`w-full border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all bg-black/20 ${!isUploading ? 'border-primary/30 cursor-pointer hover:bg-primary/5 hover:border-primary/50' : 'border-border opacity-80'}`}
+                className={`w-full premium-glass border-2 border-dashed rounded-3xl p-10 flex flex-col items-center justify-center text-center transition-all ${!isUploading ? 'border-primary/30 cursor-pointer hover:bg-white/5 hover:border-primary/60 hover:scale-[1.02]' : 'border-white/10 opacity-80'}`}
               >
                 <input 
                   type="file" 
@@ -252,24 +273,25 @@ function Dashboard() {
                   onChange={handleFileChange}
                 />
                 
-                <div className={`w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 ${!isUploading && 'glow-border'} transition-all`}>
+                <div className={`w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mb-6 ${!isUploading && 'glow-border-primary'} transition-all`}>
                   {isUploading ? (
                     <div className="relative flex items-center justify-center w-full h-full">
-                      <Loader2 className="w-8 h-8 text-primary animate-spin opacity-20" />
-                      <span className="absolute text-primary font-bold text-xs">{uploadProgress}%</span>
+                      <Loader2 className="w-10 h-10 text-primary animate-spin opacity-40" />
+                      <span className="absolute text-white font-bold text-sm">{uploadProgress}%</span>
                     </div>
                   ) : (
-                    <UploadCloud className="w-8 h-8 text-primary" />
+                    <UploadCloud className="w-10 h-10 text-primary" />
                   )}
                 </div>
                 
-                <h3 className="font-semibold text-white mb-1">
-                  {isUploading ? (uploadProgress < 95 ? 'Uploading...' : 'Processing...') : 'Click to Upload (.pptx)'}
+                <h3 className="font-bold text-white text-lg mb-2">
+                  {isUploading ? (uploadProgress < 95 ? 'Uploading Asset...' : 'Processing Cloud Sync...') : 'Click to Upload (.pptx)'}
                 </h3>
+                <p className="text-sm text-gray-400">Max file size depends on your tier.</p>
                 
                 {isUploading && (
-                  <div className="w-full h-1.5 bg-black/50 rounded-full mt-3 overflow-hidden">
-                    <div className="h-full bg-primary transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
+                  <div className="w-full h-2 bg-black/40 rounded-full mt-6 overflow-hidden border border-white/5 shadow-inner">
+                    <div className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
                   </div>
                 )}
               </div>
@@ -277,68 +299,71 @@ function Dashboard() {
           </motion.div>
 
           {/* Share Link Banner */}
-          {shareLink && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="w-full mt-6 p-4 bg-green-500/10 border border-green-500/30 rounded-2xl flex items-center justify-between backdrop-blur-md"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                  <Check className="w-5 h-5 text-green-400" />
+          <AnimatePresence>
+            {shareLink && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="w-full mt-6 p-5 premium-glass border border-secondary/40 rounded-2xl flex items-center justify-between"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center glow-border-secondary">
+                    <Check className="w-6 h-6 text-secondary" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-white text-lg">Upload complete!</p>
+                    <p className="text-sm text-gray-300">Your presentation is now live on the edge.</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-green-400">Upload complete!</p>
-                  <p className="text-sm text-green-200/70">Your presentation is now live.</p>
+                <div className="flex items-center gap-3">
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value={shareLink} 
+                    className="bg-black/30 border border-white/10 px-4 py-3 rounded-xl text-sm text-white outline-none w-72 shadow-inner"
+                  />
+                  <button onClick={copyToClipboard} className="p-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl transition-colors">
+                    {copied ? <Check className="w-5 h-5 text-secondary" /> : <Copy className="w-5 h-5 text-white" />}
+                  </button>
+                  <button onClick={() => window.open(shareLink, '_blank')} className="px-6 py-3 bg-white text-black hover:bg-gray-200 rounded-xl font-bold text-sm transition-colors shadow-lg">
+                    View Now
+                  </button>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <input 
-                  type="text" 
-                  readOnly 
-                  value={shareLink} 
-                  className="bg-black/50 border border-green-500/30 px-4 py-2 rounded-xl text-sm text-green-100 outline-none w-64"
-                />
-                <button onClick={copyToClipboard} className="p-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-xl transition-colors">
-                  {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5 text-green-400" />}
-                </button>
-                <button onClick={() => window.open(shareLink, '_blank')} className="px-4 py-2 bg-green-500 hover:bg-green-600 text-black rounded-xl font-bold text-sm transition-colors">
-                  View Now
-                </button>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </section>
 
         {/* Presentations Grid */}
         <section className="w-full">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-white font-heading">Your Library</h3>
-            <span className="text-sm font-medium text-primary px-3 py-1 bg-primary/10 rounded-full border border-primary/20">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-3xl font-bold text-white font-heading">Your Library</h3>
+            <span className="text-sm font-semibold text-primary px-4 py-1.5 premium-glass rounded-full border border-primary/30">
               {filteredPresentations.length} Items
             </span>
           </div>
           
           {loadingPresentations ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3].map(n => (
-                <div key={n} className="glass rounded-2xl h-64 animate-pulse bg-white/5 border border-white/5" />
+                <div key={n} className="premium-glass rounded-3xl h-72 animate-pulse bg-white/5" />
               ))}
             </div>
           ) : presentations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border rounded-3xl bg-surface/30 text-center glass">
-              <div className="w-20 h-20 bg-surface rounded-full flex items-center justify-center mb-6">
-                <Presentation className="w-10 h-10 text-gray-500" />
+            <div className="flex flex-col items-center justify-center py-24 premium-glass border border-dashed border-white/20 rounded-[2rem] text-center">
+              <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-8 border border-white/10">
+                <Presentation className="w-12 h-12 text-gray-400" />
               </div>
-              <h4 className="text-xl font-bold text-white font-heading mb-2">Library is empty</h4>
-              <p className="text-gray-400 max-w-sm">
+              <h4 className="text-2xl font-bold text-white font-heading mb-3">Library is empty</h4>
+              <p className="text-gray-400 max-w-md text-lg">
                 Drop your first presentation above to start building your cloud library.
               </p>
             </div>
           ) : filteredPresentations.length === 0 ? (
-            <div className="text-center py-10 text-gray-500">No presentations match your search.</div>
+            <div className="text-center py-12 text-gray-400 text-lg">No presentations match your search.</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPresentations.map((p, i) => (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
@@ -346,42 +371,49 @@ function Dashboard() {
                   transition={{ delay: i * 0.05 }}
                   key={p.id}
                   onClick={() => navigate(`/view/${p.id}`)}
-                  className="p-3 glass rounded-2xl flex flex-col cursor-pointer hover:border-primary/50 transition-all group overflow-hidden relative shadow-lg"
+                  className="p-4 premium-glass rounded-3xl flex flex-col cursor-pointer hover:border-primary/40 hover:shadow-[0_10px_40px_rgba(157,78,221,0.2)] transition-all duration-500 group overflow-hidden relative"
                 >
-                  {/* Action Bar */}
-                  <div className="absolute top-5 right-5 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <button onClick={(e) => { e.stopPropagation(); setActiveQR(p.id); }} className="p-2 bg-black/70 hover:bg-primary text-white rounded-xl backdrop-blur-md transition-colors shadow-lg" title="Show QR Code">
+                  {/* Action Tooltips (Glass Pills) */}
+                  <div className="absolute top-6 right-6 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20 translate-x-4 group-hover:translate-x-0 duration-300">
+                    <button onClick={(e) => { e.stopPropagation(); setActiveDetails(p.manifest); }} className="p-2.5 bg-black/40 backdrop-blur-xl hover:bg-white/20 text-white rounded-full border border-white/10 shadow-xl transition-all hover:scale-110" title="Details">
+                      <Info className="w-4 h-4" />
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); setActiveQR(p.id); }} className="p-2.5 bg-black/40 backdrop-blur-xl hover:bg-white/20 text-white rounded-full border border-white/10 shadow-xl transition-all hover:scale-110" title="Show QR Code">
                       <QrCode className="w-4 h-4" />
                     </button>
-                    <button onClick={(e) => handleShare(p.id, e)} className="p-2 bg-black/70 hover:bg-secondary text-white hover:text-black rounded-xl backdrop-blur-md transition-colors shadow-lg" title="Copy Link">
+                    <button onClick={(e) => handleShare(p.id, e)} className="p-2.5 bg-black/40 backdrop-blur-xl hover:bg-white/20 text-white rounded-full border border-white/10 shadow-xl transition-all hover:scale-110" title="Copy Link">
                       <Share2 className="w-4 h-4" />
                     </button>
-                    <button onClick={(e) => handleDelete(p.id, e)} disabled={deletingId === p.id} className="p-2 bg-black/70 hover:bg-red-500 text-white rounded-xl backdrop-blur-md transition-colors shadow-lg" title="Delete">
+                    <button onClick={(e) => handleDelete(p.id, e)} disabled={deletingId === p.id} className="p-2.5 bg-black/40 backdrop-blur-xl hover:bg-red-500/80 text-white rounded-full border border-white/10 shadow-xl transition-all hover:scale-110" title="Delete">
                       {deletingId === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                     </button>
                   </div>
                   
                   {/* Thumbnail Image */}
-                  <div className="w-full aspect-[16/9] bg-black rounded-xl overflow-hidden relative mb-4 border border-white/5">
+                  <div className="w-full aspect-[16/9] bg-black/50 rounded-2xl overflow-hidden relative mb-5 border border-white/5">
                     {p.manifest?.slides?.[0]?.image ? (
-                      <img src={p.manifest.slides[0].image} alt="thumbnail" className="w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 ease-out" />
+                      <img src={p.manifest.slides[0].image} alt="thumbnail" className="w-full h-full object-cover opacity-60 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700 ease-out" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-700">
-                        <Presentation className="w-10 h-10" />
+                        <Presentation className="w-12 h-12" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[2px]">
-                      <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-black shadow-[0_0_20px_rgba(0,240,255,0.5)] transform scale-50 group-hover:scale-100 transition-transform duration-300">
-                        <Play className="w-6 h-6 ml-1 fill-black" />
+                    
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[2px] z-10">
+                      <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-2xl transform scale-50 group-hover:scale-100 transition-transform duration-500 ease-out">
+                        <Play className="w-6 h-6 ml-1 fill-white" />
                       </div>
                     </div>
                   </div>
 
                   {/* Meta */}
-                  <div className="px-2 pb-2 relative z-10">
-                    <h4 className="font-bold text-white truncate text-lg font-heading">{p.manifest?.title || 'Untitled'}</h4>
-                    <p className="text-sm text-gray-400 mt-1 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-secondary glow-border"></span>
+                  <div className="px-3 pb-2 relative z-10">
+                    <h4 className="font-bold text-white truncate text-xl font-heading mb-1">{p.manifest?.title || 'Untitled'}</h4>
+                    <p className="text-sm text-gray-400 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary glow-border-primary"></span>
                       {p.manifest?.slides?.length || 0} Slides
                     </p>
                   </div>
@@ -392,31 +424,96 @@ function Dashboard() {
         </section>
       </main>
 
+      {/* Details Modal */}
+      <AnimatePresence>
+        {activeDetails && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-lg" onClick={() => setActiveDetails(null)}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="premium-glass-heavy p-10 rounded-[2.5rem] flex flex-col shadow-2xl relative max-w-md w-full border border-white/10"
+            >
+              <button onClick={() => setActiveDetails(null)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors bg-white/5 p-2.5 rounded-full hover:bg-white/10">
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="flex items-center gap-4 mb-8">
+                <div className="p-4 bg-primary/10 rounded-2xl border border-primary/30 glow-border-primary">
+                  <FileText className="text-primary w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white font-heading leading-tight truncate max-w-[200px]">File Details</h3>
+                  <p className="text-gray-400 text-sm">Presentation Metadata</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1 block">Title</label>
+                  <p className="text-lg text-white font-medium">{activeDetails.title || 'Untitled'}</p>
+                </div>
+                
+                {activeDetails.originalName && (
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1 block">Original Filename</label>
+                    <p className="text-sm text-gray-300 break-all bg-black/20 p-3 rounded-xl border border-white/5 font-mono">{activeDetails.originalName}</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><HardDrive className="w-3.5 h-3.5"/> Size</label>
+                    <p className="text-lg text-white font-medium">{formatSize(activeDetails.size)}</p>
+                  </div>
+                  
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><Presentation className="w-3.5 h-3.5"/> Slides</label>
+                    <p className="text-lg text-white font-medium">{activeDetails.slides?.length || 0}</p>
+                  </div>
+                </div>
+
+                {activeDetails.createdAt && (
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col justify-center">
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5"/> Uploaded On</label>
+                    <p className="text-md text-white font-medium">{formatDate(activeDetails.createdAt)}</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* QR Code Modal */}
-      {activeQR && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => setActiveQR(null)}>
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            onClick={(e) => e.stopPropagation()}
-            className="glass-card p-10 rounded-[2rem] flex flex-col items-center shadow-2xl relative max-w-sm w-full border border-primary/30"
-          >
-            <button onClick={() => setActiveQR(null)} className="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors bg-surface/50 p-2 rounded-full">
-              <X className="w-5 h-5" />
-            </button>
-            <div className="p-4 bg-primary/10 rounded-2xl border border-primary/30 mb-6 glow-border">
-              <QrCode className="text-primary w-8 h-8" />
-            </div>
-            <h3 className="text-2xl font-bold text-white font-heading mb-6 glow-text">Scan to View</h3>
-            <div className="p-5 bg-white rounded-2xl mb-8 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-              <QRCodeSVG value={`${window.location.origin}/view/${activeQR}`} size={220} level="H" />
-            </div>
-            <p className="text-sm text-gray-300 text-center leading-relaxed">
-              Scan this QR code with your mobile device to open the presentation instantly.
-            </p>
-          </motion.div>
-        </div>
-      )}
+      <AnimatePresence>
+        {activeQR && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-lg" onClick={() => setActiveQR(null)}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="premium-glass-heavy p-10 rounded-[2.5rem] flex flex-col items-center shadow-2xl relative max-w-sm w-full border border-white/10"
+            >
+              <button onClick={() => setActiveQR(null)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors bg-white/5 p-2.5 rounded-full hover:bg-white/10">
+                <X className="w-5 h-5" />
+              </button>
+              <div className="p-4 bg-primary/10 rounded-2xl border border-primary/30 mb-6 glow-border-primary">
+                <QrCode className="text-primary w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-bold text-white font-heading mb-8 glow-text-primary">Scan to View</h3>
+              <div className="p-5 bg-white rounded-3xl mb-8 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
+                <QRCodeSVG value={`${window.location.origin}/view/${activeQR}`} size={220} level="H" />
+              </div>
+              <p className="text-sm text-gray-300 text-center leading-relaxed">
+                Scan this QR code with your mobile device to open the presentation instantly.
+              </p>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
