@@ -181,10 +181,11 @@ app.post('/api/upload', authenticateToken, upload.single('presentation'), async 
             const xmlData = fs.readFileSync(relPath, 'utf8');
             try {
               const parsed = parser.parse(xmlData);
-              let relationships = parsed.Relationships.Relationship;
+              let relationships = parsed?.Relationships?.Relationship;
+              if (!relationships) relationships = [];
               if (!Array.isArray(relationships)) relationships = [relationships];
               
-              const videoRels = relationships.filter(r => r["@_Type"].includes('/video') || r["@_Type"].includes('/media'));
+              const videoRels = relationships.filter(r => r && r["@_Type"] && (r["@_Type"].includes('/video') || r["@_Type"].includes('/media')));
               
               for (const videoRel of videoRels) {
                 if (videoRel && videoRel["@_Target"]) {
