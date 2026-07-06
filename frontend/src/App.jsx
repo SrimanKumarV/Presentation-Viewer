@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children }) => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <Loader2 className="w-8 h-8 text-white/50 animate-spin" />
       </div>
     );
   }
@@ -198,42 +198,35 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-background text-foreground p-8 flex flex-col items-center relative overflow-hidden font-sans">
       
-      {/* Cinematic Mesh Background */}
-      <div className="mesh-bg">
-        <div className="mesh-blob mesh-blob-1" />
-        <div className="mesh-blob mesh-blob-2" />
-        <div className="mesh-blob mesh-blob-3" />
-      </div>
-
       {/* Header */}
       <header className="w-full max-w-6xl flex items-center justify-between py-6 mb-8 border-b border-white/10 relative z-10">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10 premium-glass glow-border-primary">
-            <Presentation className="text-white w-6 h-6" />
+          <div className="p-2.5 bg-white/10 rounded-xl border border-white/20 vision-glass">
+            <Presentation className="text-white w-5 h-5" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white font-heading">
-            Nexus Viewer
+          <h1 className="text-2xl font-semibold tracking-tight text-white font-heading">
+            Nexus
           </h1>
         </div>
         
         <div className="flex items-center gap-6">
           <div className="relative hidden md:block">
-            <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" />
             <input 
               type="text" 
               placeholder="Search presentations..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-11 pr-4 py-2.5 premium-glass rounded-full text-sm text-white focus:outline-none focus:border-primary/50 w-64 transition-all focus:w-80 shadow-inner"
+              className="pl-11 pr-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-white focus:outline-none focus:border-white/30 w-64 transition-all focus:w-80"
             />
           </div>
           <div className="flex items-center gap-4 border-l border-white/10 pl-6">
-            <div className="text-sm font-medium text-gray-300 hidden sm:block">
+            <div className="text-sm font-medium text-gray-400 hidden sm:block">
               {user?.email}
             </div>
             <button 
               onClick={handleLogout}
-              className="p-2.5 premium-glass hover:bg-white/10 rounded-xl text-gray-400 hover:text-red-400 transition-colors"
+              className="p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors"
               title="Log Out"
             >
               <LogOut className="w-5 h-5" />
@@ -249,21 +242,21 @@ function Dashboard() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="premium-glass-heavy rounded-[2rem] p-12 flex flex-col md:flex-row items-center justify-between gap-12"
+            className="vision-glass-heavy rounded-3xl p-10 flex flex-col md:flex-row items-center justify-between gap-12"
           >
             <div className="flex-1 text-left">
-              <h2 className="text-4xl font-bold text-white font-heading mb-4 leading-tight">
-                Host your next <span className="glow-text-primary text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">big idea.</span>
+              <h2 className="text-3xl font-semibold text-white font-heading mb-3 tracking-tight">
+                Upload Presentation
               </h2>
-              <p className="text-gray-300 max-w-md text-lg leading-relaxed">
-                Upload PowerPoint presentations and instantly turn them into ultra-fast, cloud-streamed interactive media players.
+              <p className="text-gray-400 max-w-md text-base leading-relaxed">
+                Turn your PowerPoint files into ultra-fast, cloud-streamed interactive media players instantly.
               </p>
             </div>
 
             <div className="flex-1 w-full max-w-md">
               <div 
                 onClick={!isUploading ? handleUploadClick : undefined}
-                className={`w-full premium-glass border-2 border-dashed rounded-3xl p-10 flex flex-col items-center justify-center text-center transition-all ${!isUploading ? 'border-primary/30 cursor-pointer hover:bg-white/5 hover:border-primary/60 hover:scale-[1.02]' : 'border-white/10 opacity-80'}`}
+                className={`w-full bg-black/40 border border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all ${!isUploading ? 'cursor-pointer hover:bg-white/5 hover:border-white/30' : 'opacity-80'}`}
               >
                 <input 
                   type="file" 
@@ -273,25 +266,23 @@ function Dashboard() {
                   onChange={handleFileChange}
                 />
                 
-                <div className={`w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mb-6 ${!isUploading && 'glow-border-primary'} transition-all`}>
+                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-5 border border-white/10">
                   {isUploading ? (
                     <div className="relative flex items-center justify-center w-full h-full">
-                      <Loader2 className="w-10 h-10 text-primary animate-spin opacity-40" />
-                      <span className="absolute text-white font-bold text-sm">{uploadProgress}%</span>
+                      <Loader2 className="w-8 h-8 text-white/50 animate-spin" />
                     </div>
                   ) : (
-                    <UploadCloud className="w-10 h-10 text-primary" />
+                    <UploadCloud className="w-8 h-8 text-white" />
                   )}
                 </div>
                 
-                <h3 className="font-bold text-white text-lg mb-2">
-                  {isUploading ? (uploadProgress < 95 ? 'Uploading Asset...' : 'Processing Cloud Sync...') : 'Click to Upload (.pptx)'}
+                <h3 className="font-medium text-white text-base mb-1">
+                  {isUploading ? (uploadProgress < 95 ? 'Uploading Asset...' : 'Processing Cloud Sync...') : 'Select .pptx file'}
                 </h3>
-                <p className="text-sm text-gray-400">Max file size depends on your tier.</p>
                 
                 {isUploading && (
-                  <div className="w-full h-2 bg-black/40 rounded-full mt-6 overflow-hidden border border-white/5 shadow-inner">
-                    <div className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
+                  <div className="w-full h-1.5 bg-white/10 rounded-full mt-5 overflow-hidden">
+                    <div className="h-full bg-white transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
                   </div>
                 )}
               </div>
@@ -305,15 +296,15 @@ function Dashboard() {
                 initial={{ opacity: 0, y: -20, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="w-full mt-6 p-5 premium-glass border border-secondary/40 rounded-2xl flex items-center justify-between"
+                className="w-full mt-6 p-4 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-between backdrop-blur-xl"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center glow-border-secondary">
-                    <Check className="w-6 h-6 text-secondary" />
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <Check className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-bold text-white text-lg">Upload complete!</p>
-                    <p className="text-sm text-gray-300">Your presentation is now live on the edge.</p>
+                    <p className="font-semibold text-white text-base">Upload complete</p>
+                    <p className="text-sm text-gray-300">Your presentation is now live.</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -321,13 +312,13 @@ function Dashboard() {
                     type="text" 
                     readOnly 
                     value={shareLink} 
-                    className="bg-black/30 border border-white/10 px-4 py-3 rounded-xl text-sm text-white outline-none w-72 shadow-inner"
+                    className="bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white outline-none w-72"
                   />
-                  <button onClick={copyToClipboard} className="p-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl transition-colors">
-                    {copied ? <Check className="w-5 h-5 text-secondary" /> : <Copy className="w-5 h-5 text-white" />}
+                  <button onClick={copyToClipboard} className="p-2.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg transition-colors">
+                    {copied ? <Check className="w-5 h-5 text-white" /> : <Copy className="w-5 h-5 text-white" />}
                   </button>
-                  <button onClick={() => window.open(shareLink, '_blank')} className="px-6 py-3 bg-white text-black hover:bg-gray-200 rounded-xl font-bold text-sm transition-colors shadow-lg">
-                    View Now
+                  <button onClick={() => window.open(shareLink, '_blank')} className="px-6 py-2.5 bg-white text-black hover:bg-gray-200 rounded-lg font-medium text-sm transition-colors">
+                    View
                   </button>
                 </div>
               </motion.div>
@@ -338,32 +329,32 @@ function Dashboard() {
         {/* Presentations Grid */}
         <section className="w-full">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-3xl font-bold text-white font-heading">Your Library</h3>
-            <span className="text-sm font-semibold text-primary px-4 py-1.5 premium-glass rounded-full border border-primary/30">
+            <h3 className="text-2xl font-semibold text-white font-heading tracking-tight">Library</h3>
+            <span className="text-sm font-medium text-gray-400 px-3 py-1 bg-white/5 rounded-full border border-white/10">
               {filteredPresentations.length} Items
             </span>
           </div>
           
           {loadingPresentations ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map(n => (
-                <div key={n} className="premium-glass rounded-3xl h-72 animate-pulse bg-white/5" />
+                <div key={n} className="vision-glass rounded-2xl h-64 animate-pulse" />
               ))}
             </div>
           ) : presentations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 premium-glass border border-dashed border-white/20 rounded-[2rem] text-center">
-              <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-8 border border-white/10">
-                <Presentation className="w-12 h-12 text-gray-400" />
+            <div className="flex flex-col items-center justify-center py-20 vision-glass border-dashed rounded-[2rem] text-center">
+              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 border border-white/10">
+                <Presentation className="w-10 h-10 text-gray-500" />
               </div>
-              <h4 className="text-2xl font-bold text-white font-heading mb-3">Library is empty</h4>
-              <p className="text-gray-400 max-w-md text-lg">
-                Drop your first presentation above to start building your cloud library.
+              <h4 className="text-xl font-semibold text-white font-heading mb-2">No presentations</h4>
+              <p className="text-gray-400 text-base max-w-sm">
+                Upload your first .pptx file above.
               </p>
             </div>
           ) : filteredPresentations.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 text-lg">No presentations match your search.</div>
+            <div className="text-center py-12 text-gray-500 text-base">No presentations match your search.</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPresentations.map((p, i) => (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
@@ -371,39 +362,36 @@ function Dashboard() {
                   transition={{ delay: i * 0.05 }}
                   key={p.id}
                   onClick={() => navigate(`/view/${p.id}`)}
-                  className="p-4 premium-glass rounded-3xl flex flex-col cursor-pointer hover:border-primary/40 hover:shadow-[0_10px_40px_rgba(157,78,221,0.2)] transition-all duration-500 group overflow-hidden relative"
+                  className="p-3 vision-glass rounded-3xl flex flex-col cursor-pointer hover:bg-white/5 border border-white/10 transition-all duration-300 group overflow-hidden relative"
                 >
                   {/* Action Tooltips (Glass Pills) */}
-                  <div className="absolute top-6 right-6 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20 translate-x-4 group-hover:translate-x-0 duration-300">
-                    <button onClick={(e) => { e.stopPropagation(); setActiveDetails(p.manifest); }} className="p-2.5 bg-black/40 backdrop-blur-xl hover:bg-white/20 text-white rounded-full border border-white/10 shadow-xl transition-all hover:scale-110" title="Details">
+                  <div className="absolute top-5 right-5 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <button onClick={(e) => { e.stopPropagation(); setActiveDetails(p.manifest); }} className="p-2.5 bg-black/60 backdrop-blur-xl hover:bg-white/20 text-white rounded-full border border-white/10 transition-colors" title="Details">
                       <Info className="w-4 h-4" />
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); setActiveQR(p.id); }} className="p-2.5 bg-black/40 backdrop-blur-xl hover:bg-white/20 text-white rounded-full border border-white/10 shadow-xl transition-all hover:scale-110" title="Show QR Code">
+                    <button onClick={(e) => { e.stopPropagation(); setActiveQR(p.id); }} className="p-2.5 bg-black/60 backdrop-blur-xl hover:bg-white/20 text-white rounded-full border border-white/10 transition-colors" title="Show QR Code">
                       <QrCode className="w-4 h-4" />
                     </button>
-                    <button onClick={(e) => handleShare(p.id, e)} className="p-2.5 bg-black/40 backdrop-blur-xl hover:bg-white/20 text-white rounded-full border border-white/10 shadow-xl transition-all hover:scale-110" title="Copy Link">
+                    <button onClick={(e) => handleShare(p.id, e)} className="p-2.5 bg-black/60 backdrop-blur-xl hover:bg-white/20 text-white rounded-full border border-white/10 transition-colors" title="Copy Link">
                       <Share2 className="w-4 h-4" />
                     </button>
-                    <button onClick={(e) => handleDelete(p.id, e)} disabled={deletingId === p.id} className="p-2.5 bg-black/40 backdrop-blur-xl hover:bg-red-500/80 text-white rounded-full border border-white/10 shadow-xl transition-all hover:scale-110" title="Delete">
+                    <button onClick={(e) => handleDelete(p.id, e)} disabled={deletingId === p.id} className="p-2.5 bg-black/60 backdrop-blur-xl hover:bg-red-500/80 text-white rounded-full border border-white/10 transition-colors" title="Delete">
                       {deletingId === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                     </button>
                   </div>
                   
                   {/* Thumbnail Image */}
-                  <div className="w-full aspect-[16/9] bg-black/50 rounded-2xl overflow-hidden relative mb-5 border border-white/5">
+                  <div className="w-full aspect-[16/9] bg-black/80 rounded-2xl overflow-hidden relative mb-4 border border-white/5">
                     {p.manifest?.slides?.[0]?.image ? (
-                      <img src={p.manifest.slides[0].image} alt="thumbnail" className="w-full h-full object-cover opacity-60 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700 ease-out" />
+                      <img src={p.manifest.slides[0].image} alt="thumbnail" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 ease-out" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-700">
-                        <Presentation className="w-12 h-12" />
+                        <Presentation className="w-10 h-10" />
                       </div>
                     )}
                     
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[2px] z-10">
-                      <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-2xl transform scale-50 group-hover:scale-100 transition-transform duration-500 ease-out">
+                      <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform scale-90 group-hover:scale-100 transition-transform duration-300">
                         <Play className="w-6 h-6 ml-1 fill-white" />
                       </div>
                     </div>
@@ -411,9 +399,8 @@ function Dashboard() {
 
                   {/* Meta */}
                   <div className="px-3 pb-2 relative z-10">
-                    <h4 className="font-bold text-white truncate text-xl font-heading mb-1">{p.manifest?.title || 'Untitled'}</h4>
-                    <p className="text-sm text-gray-400 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary glow-border-primary"></span>
+                    <h4 className="font-medium text-white truncate text-lg font-heading mb-1 tracking-tight">{p.manifest?.title || 'Untitled'}</h4>
+                    <p className="text-sm text-gray-500 flex items-center gap-2">
                       {p.manifest?.slides?.length || 0} Slides
                     </p>
                   </div>
@@ -427,57 +414,56 @@ function Dashboard() {
       {/* Details Modal */}
       <AnimatePresence>
         {activeDetails && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-lg" onClick={() => setActiveDetails(null)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl" onClick={() => setActiveDetails(null)}>
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="premium-glass-heavy p-10 rounded-[2.5rem] flex flex-col shadow-2xl relative max-w-md w-full border border-white/10"
+              className="vision-glass-heavy p-8 rounded-3xl flex flex-col shadow-2xl relative max-w-sm w-full"
             >
-              <button onClick={() => setActiveDetails(null)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors bg-white/5 p-2.5 rounded-full hover:bg-white/10">
+              <button onClick={() => setActiveDetails(null)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors bg-white/5 p-2 rounded-full">
                 <X className="w-5 h-5" />
               </button>
               
               <div className="flex items-center gap-4 mb-8">
-                <div className="p-4 bg-primary/10 rounded-2xl border border-primary/30 glow-border-primary">
-                  <FileText className="text-primary w-8 h-8" />
+                <div className="p-3 bg-white/10 rounded-xl border border-white/20">
+                  <FileText className="text-white w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white font-heading leading-tight truncate max-w-[200px]">File Details</h3>
-                  <p className="text-gray-400 text-sm">Presentation Metadata</p>
+                  <h3 className="text-xl font-semibold text-white font-heading truncate max-w-[200px]">File Details</h3>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1 block">Title</label>
-                  <p className="text-lg text-white font-medium">{activeDetails.title || 'Untitled'}</p>
+                  <label className="text-xs font-medium text-gray-500 uppercase mb-1.5 block">Title</label>
+                  <p className="text-base text-white">{activeDetails.title || 'Untitled'}</p>
                 </div>
                 
                 {activeDetails.originalName && (
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1 block">Original Filename</label>
-                    <p className="text-sm text-gray-300 break-all bg-black/20 p-3 rounded-xl border border-white/5 font-mono">{activeDetails.originalName}</p>
+                    <label className="text-xs font-medium text-gray-500 uppercase mb-1.5 block">Filename</label>
+                    <p className="text-sm text-gray-300 break-all">{activeDetails.originalName}</p>
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><HardDrive className="w-3.5 h-3.5"/> Size</label>
-                    <p className="text-lg text-white font-medium">{formatSize(activeDetails.size)}</p>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase mb-1.5 flex items-center gap-1.5"><HardDrive className="w-3.5 h-3.5"/> Size</label>
+                    <p className="text-base text-white">{formatSize(activeDetails.size)}</p>
                   </div>
                   
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><Presentation className="w-3.5 h-3.5"/> Slides</label>
-                    <p className="text-lg text-white font-medium">{activeDetails.slides?.length || 0}</p>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase mb-1.5 flex items-center gap-1.5"><Presentation className="w-3.5 h-3.5"/> Slides</label>
+                    <p className="text-base text-white">{activeDetails.slides?.length || 0}</p>
                   </div>
                 </div>
 
                 {activeDetails.createdAt && (
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col justify-center">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5"/> Uploaded On</label>
-                    <p className="text-md text-white font-medium">{formatDate(activeDetails.createdAt)}</p>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase mb-1.5 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5"/> Uploaded</label>
+                    <p className="text-base text-white">{formatDate(activeDetails.createdAt)}</p>
                   </div>
                 )}
               </div>
@@ -489,26 +475,26 @@ function Dashboard() {
       {/* QR Code Modal */}
       <AnimatePresence>
         {activeQR && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-lg" onClick={() => setActiveQR(null)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl" onClick={() => setActiveQR(null)}>
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="premium-glass-heavy p-10 rounded-[2.5rem] flex flex-col items-center shadow-2xl relative max-w-sm w-full border border-white/10"
+              className="vision-glass-heavy p-8 rounded-3xl flex flex-col items-center shadow-2xl relative max-w-sm w-full"
             >
-              <button onClick={() => setActiveQR(null)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors bg-white/5 p-2.5 rounded-full hover:bg-white/10">
+              <button onClick={() => setActiveQR(null)} className="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors bg-white/5 p-2 rounded-full">
                 <X className="w-5 h-5" />
               </button>
-              <div className="p-4 bg-primary/10 rounded-2xl border border-primary/30 mb-6 glow-border-primary">
-                <QrCode className="text-primary w-8 h-8" />
+              <div className="p-3 bg-white/10 rounded-xl border border-white/20 mb-5">
+                <QrCode className="text-white w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold text-white font-heading mb-8 glow-text-primary">Scan to View</h3>
-              <div className="p-5 bg-white rounded-3xl mb-8 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
-                <QRCodeSVG value={`${window.location.origin}/view/${activeQR}`} size={220} level="H" />
+              <h3 className="text-xl font-semibold text-white font-heading mb-6">Scan QR</h3>
+              <div className="p-4 bg-white rounded-2xl mb-6">
+                <QRCodeSVG value={`${window.location.origin}/view/${activeQR}`} size={200} level="H" />
               </div>
-              <p className="text-sm text-gray-300 text-center leading-relaxed">
-                Scan this QR code with your mobile device to open the presentation instantly.
+              <p className="text-sm text-gray-400 text-center">
+                Scan to open instantly on mobile.
               </p>
             </motion.div>
           </div>

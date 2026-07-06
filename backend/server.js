@@ -166,7 +166,7 @@ app.post('/api/upload', authenticateToken, upload.single('presentation'), async 
             id: `s${slideNum}`,
             type: 'slide',
             image: cloudImgUrl,
-            video: null
+            videos: []
           };
 
           // Check for video relationship using robust mapping
@@ -184,14 +184,19 @@ app.post('/api/upload', authenticateToken, upload.single('presentation'), async 
               let relationships = parsed.Relationships.Relationship;
               if (!Array.isArray(relationships)) relationships = [relationships];
               
-              const videoRel = relationships.find(r => r["@_Type"].includes('/video'));
-              if (videoRel && videoRel["@_Target"]) {
-                const targetPath = videoRel["@_Target"].replace('../media/', '');
-                const localVideoPath = path.join(rawDir, 'ppt', 'media', targetPath);
-                
-                // Upload Video to Supabase
-                const cloudVideoUrl = await uploadToSupabase(localVideoPath, `${presentationId}/videos/${targetPath}`, 'video/mp4');
-                slideData.video = cloudVideoUrl;
+              const videoRels = relationships.filter(r => r["@_Type"].includes('/video') || r["@_Type"].includes('/media'));
+              
+              for (const videoRel of videoRels) {
+                if (videoRel && videoRel["@_Target"]) {
+                  const targetPath = videoRel["@_Target"].replace('../media/', '');
+                  const localVideoPath = path.join(rawDir, 'ppt', 'media', targetPath);
+                  
+                  // Upload Video to Supabase
+                  if (fs.existsSync(localVideoPath)) {
+                    const cloudVideoUrl = await uploadToSupabase(localVideoPath, `${presentationId}/videos/${targetPath}`, 'video/mp4');
+                    slideData.videos.push(cloudVideoUrl);
+                  }
+                }
               }
             } catch (e) {
               console.error(`Error parsing XML for slide ${slideNum}`, e);

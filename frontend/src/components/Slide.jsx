@@ -1,48 +1,47 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
 export default function Slide({ slide, isActive, preload }) {
   const [isLoading, setIsLoading] = useState(true);
-  const videoRef = useRef(null);
 
   // Auto-play / pause based on active state
   useEffect(() => {
-    if (slide.video && videoRef.current) {
-      if (isActive) {
-        videoRef.current.play().catch(e => console.log('Autoplay prevented:', e));
-      } else {
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0; // reset when not active
-      }
+    const videos = document.querySelectorAll(`video[data-slide-id="${slide.id}"]`);
+    if (isActive) {
+      videos.forEach(v => v.play().catch(e => console.log('Autoplay prevented:', e)));
+    } else {
+      videos.forEach(v => {
+        v.pause();
+        v.currentTime = 0; // reset when not active
+      });
     }
-  }, [isActive, slide.video]);
+  }, [isActive, slide.id]);
 
   // If this slide isn't active and we aren't supposed to preload it, don't render heavy media
   if (!isActive && !preload) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-surface">
-         <Loader2 className="animate-spin w-8 h-8 text-border" />
+      <div className="w-full h-full flex items-center justify-center bg-transparent">
+         <Loader2 className="animate-spin w-8 h-8 text-white/20" />
       </div>
     );
   }
 
-  // Backwards compatibility for mock data
+  // Backwards compatibility for old manifest structures
   const isLegacyImage = slide.type === 'image';
-  const isLegacyVideo = slide.type === 'video';
   const imgUrl = slide.image || (isLegacyImage ? slide.url : null);
-  const videoUrl = slide.video || (isLegacyVideo ? slide.url : null);
+  const videoUrls = slide.videos || (slide.video ? [slide.video] : []);
 
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: isActive ? 1 : 0.4 }}
       transition={{ duration: 0.5 }}
-      className="w-full h-full absolute top-0 left-0 flex items-center justify-center bg-background"
+      className="w-full h-full absolute top-0 left-0 flex items-center justify-center bg-black"
     >
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
-          <Loader2 className="animate-spin w-10 h-10 text-primary" />
+          <Loader2 className="animate-spin w-10 h-10 text-white/30" />
         </div>
       )}
 
@@ -57,19 +56,19 @@ export default function Slide({ slide, isActive, preload }) {
         />
       )}
 
-      {/* Embedded Video Overlay */}
-      {videoUrl && (
-        <div className="w-full h-full absolute inset-0 flex items-center justify-center z-10">
+      {/* Embedded Videos */}
+      {videoUrls.map((url, i) => (
+        <div key={i} className="w-full h-full absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
           <video
-            ref={videoRef}
-            src={videoUrl}
-            className="w-full h-full object-contain"
+            data-slide-id={slide.id}
+            src={url}
+            className="w-full h-full object-contain pointer-events-auto"
             onCanPlay={() => setIsLoading(false)}
             controls
             playsInline
           />
         </div>
-      )}
+      ))}
     </motion.div>
   );
 }
