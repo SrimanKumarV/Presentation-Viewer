@@ -17,6 +17,13 @@ COPY backend/ ./backend/
 COPY frontend/package*.json ./frontend/
 RUN cd frontend && npm install
 COPY frontend/ ./frontend/
+
+# Declare Render environment variables as build args so Vite can see them!
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+
 RUN cd frontend && npm run build
 
 # Set permissions for the bash script
