@@ -201,6 +201,24 @@ app.post('/api/upload', authenticateToken, upload.single('presentation'), async 
   }
 });
 
+// API: Delete a presentation (Protected)
+app.delete('/api/presentations/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  if (!supabase) return res.status(500).json({ error: 'Cloud storage is not configured.' });
+
+  const { error } = await supabase
+    .from('presentations')
+    .delete()
+    .match({ id: id, user_id: req.user.id });
+
+  if (error) {
+    console.error('Error deleting presentation:', error);
+    return res.status(500).json({ error: 'Failed to delete presentation' });
+  }
+
+  res.json({ message: 'Presentation deleted successfully' });
+});
+
 // API: Get user's presentations (Protected)
 app.get('/api/presentations', authenticateToken, async (req, res) => {
   if (!supabase) return res.status(500).json({ error: 'Cloud storage is not configured.' });

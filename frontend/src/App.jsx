@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Navigate } from 'react-router-dom';
-import { Presentation, UploadCloud, Copy, Check, LogOut, Loader2, Play } from 'lucide-react';
+import { Presentation, UploadCloud, Copy, Check, LogOut, Loader2, Play, Trash2, Share2, QrCode, X } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import PresentationViewer from './components/PresentationViewer';
 import Auth from './pages/Auth';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -34,6 +35,8 @@ function Dashboard() {
   const [copied, setCopied] = useState(false);
   const [presentations, setPresentations] = useState([]);
   const [loadingPresentations, setLoadingPresentations] = useState(true);
+  const [activeQR, setActiveQR] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -57,6 +60,38 @@ function Dashboard() {
     } finally {
       setLoadingPresentations(false);
     }
+  };
+
+  const handleDelete = async (id, e) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to delete this presentation?')) return;
+    
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/presentations/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      });
+      if (res.ok) {
+        fetchPresentations();
+      } else {
+        alert('Failed to delete presentation.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error occurred.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleShare = (id, e) => {
+    e.stopPropagation();
+    const link = `${window.location.origin}/view/${id}`;
+    navigator.clipboard.writeText(link);
+    alert('Link copied to clipboard!');
   };
 
   const handleUploadClick = () => {
@@ -302,6 +337,18 @@ function Dashboard() {
                   onClick={() => navigate(`/view/${p.id}`)}
                   className="p-5 bg-surface/60 backdrop-blur-md border border-border rounded-2xl flex flex-col cursor-pointer hover:bg-surface-hover hover:border-primary/50 transition-all group overflow-hidden relative"
                 >
+                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <button onClick={(e) => { e.stopPropagation(); setActiveQR(p.id); }} className="p-2 bg-black/60 hover:bg-primary/50 text-white rounded-lg backdrop-blur-md transition-colors border border-white/10" title="Show QR Code">
+                      <QrCode className="w-4 h-4" />
+                    </button>
+                    <button onClick={(e) => handleShare(p.id, e)} className="p-2 bg-black/60 hover:bg-green-500/50 text-white rounded-lg backdrop-blur-md transition-colors border border-white/10" title="Copy Link">
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={(e) => handleDelete(p.id, e)} disabled={deletingId === p.id} className="p-2 bg-black/60 hover:bg-red-500/50 text-white rounded-lg backdrop-blur-md transition-colors border border-white/10" title="Delete">
+                      {deletingId === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   
                   <div className="w-full aspect-[16/9] bg-black/50 rounded-xl overflow-hidden relative mb-4 border border-border/50 group-hover:border-primary/30 transition-colors">
@@ -329,8 +376,33 @@ function Dashboard() {
             </div>
           )}
         </section>
-
       </main>
+
+      {/* QR Code Modal */}
+      {activeQR && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setActiveQR(null)}>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-surface/90 backdrop-blur-xl border border-border p-8 rounded-3xl flex flex-col items-center shadow-2xl relative max-w-sm w-full"
+          >
+            <button onClick={() => setActiveQR(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+            <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20 mb-4">
+              <QrCode className="text-primary w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-6">Scan to View</h3>
+            <div className="p-4 bg-white rounded-xl mb-6 shadow-inner">
+              <QRCodeSVG value={`${window.location.origin}/view/${activeQR}`} size={200} level="H" />
+            </div>
+            <p className="text-sm text-gray-400 text-center">
+              Scan this QR code with any mobile device to open the presentation instantly. No app required.
+            </p>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
