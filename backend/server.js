@@ -27,6 +27,23 @@ if (supabaseUrl && supabaseKey) {
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR);
 
+// Middleware to verify Supabase JWT
+const authenticateToken = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) return res.status(401).json({ error: 'Unauthorized: No token provided' });
+
+  if (!supabase) return res.status(500).json({ error: 'Supabase not configured' });
+
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  
+  if (error || !user) return res.status(403).json({ error: 'Forbidden: Invalid token' });
+  
+  req.user = user;
+  next();
+};
+
 // Helper function to upload file to Supabase Storage
 const uploadToSupabase = async (filePath, destinationPath, contentType) => {
   if (!supabase) throw new Error("Supabase is not configured.");
@@ -56,7 +73,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // API: Upload Presentation (.pptx or .zip)
-app.post('/api/upload', upload.single('presentation'), async (req, res) => {
+app.post('/api/upload', authenticateToken, upload.single('presentation'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     if (!supabase) return res.status(500).json({ error: 'Cloud storage is not configured. Please add Supabase keys to .env' });
@@ -152,11 +169,11 @@ app.post('/api/upload', upload.single('presentation'), async (req, res) => {
           slides
         };
 
-        // 4. Save Manifest to Supabase Postgres Database
+        // 4. Save Manifest to Supabase Postgres Database (with user_id)
         const { error: dbError } = await supabase
-          .from('presentations') // User needs to create this table
+          .from('presentations') // User needs to create this table with user_id column
           .insert([
-            { id: presentationId, manifest: newPresentation }
+            { id: presentationId, user_id: req.user.id, manifest: newPresentation }
           ]);
 
         if (dbError) throw dbError;
@@ -178,7 +195,24 @@ app.post('/api/upload', upload.single('presentation'), async (req, res) => {
   }
 });
 
-// API: Get presentation manifest from Cloud
+// API: Get user's presentations (Protected)
+app.get('/api/presentations', authenticateToken, async (req, res) => {
+  if (!supabase) return res.status(500).json({ error: 'Cloud storage is not configured.' });
+
+  const { data, error } = await supabase
+    .from('presentations')
+    .select('id, manifest')
+    .eq('user_id', req.user.id);
+
+  if (error) {
+    console.error('Error fetching presentations:', error);
+    return res.status(500).json({ error: 'Failed to fetch presentations' });
+  }
+
+  res.json(data);
+});
+
+// API: Get presentation manifest from Cloud (Public, so anyone with link can view)
 app.get('/api/presentation/:id', async (req, res) => {
   const { id } = req.params;
   if (!supabase) return res.status(500).json({ error: 'Cloud storage is not configured.' });
