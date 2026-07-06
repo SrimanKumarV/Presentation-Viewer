@@ -117,6 +117,10 @@ export default function PresentationViewer({ presentationId, onExit }) {
         <div className="h-full bg-primary glow-border transition-all duration-300 ease-out" style={{ width: `${progress}%` }} />
       </div>
 
+      {/* Mobile Touch Navigation Zones */}
+      <div className="absolute top-0 left-0 w-1/3 h-full z-30 cursor-pointer tap-highlight-transparent" onClick={handlePrev} />
+      <div className="absolute top-0 right-0 w-1/3 h-full z-30 cursor-pointer tap-highlight-transparent" onClick={handleNext} />
+
       {/* Thumbnail Sidebar (Collapsible) */}
       <div 
         className={`absolute top-0 left-0 h-full bg-surface/90 backdrop-blur-xl border-r border-border z-40 transition-transform duration-500 ease-in-out flex flex-col overflow-y-auto hide-scrollbar w-64 ${showSidebar ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}

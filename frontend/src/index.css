@@ -72,3 +72,8 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Mobile tap improvements */
+.tap-highlight-transparent {
+  -webkit-tap-highlight-color: transparent;
+}
