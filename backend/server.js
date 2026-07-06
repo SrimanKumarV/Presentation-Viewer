@@ -4,9 +4,10 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const AdmZip = require('adm-zip');
 const { v4: uuidv4 } = require('uuid');
 const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
 const { XMLParser } = require('fast-xml-parser');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -88,9 +89,14 @@ app.post('/api/upload', authenticateToken, upload.single('presentation'), async 
     fs.mkdirSync(rawDir);
     fs.mkdirSync(slidesDir);
 
-    // 1. Extract archive to rawDir to get the media
-    const zip = new AdmZip(originalFile);
-    zip.extractAllTo(rawDir, true);
+    // 1. Extract archive to rawDir to get the media using OS-level commands (Memory Efficient)
+    let unzipCommand = '';
+    if (process.platform === 'win32') {
+      unzipCommand = `powershell -command "Expand-Archive -Force -Path '${originalFile}' -DestinationPath '${rawDir}'"`;
+    } else {
+      unzipCommand = `unzip -o "${originalFile}" -d "${rawDir}"`;
+    }
+    await execPromise(unzipCommand);
 
     // 2. Convert PPTX to high-fidelity JPG slides using OS-specific script
     let command = '';
