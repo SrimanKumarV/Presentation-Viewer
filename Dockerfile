@@ -1,4 +1,4 @@
-FROM node:18-bullseye
+FROM node:20-bullseye
 
 # Install LibreOffice and Poppler-Utils for PPTX -> PDF -> JPG conversion
 RUN apt-get update && apt-get install -y \
