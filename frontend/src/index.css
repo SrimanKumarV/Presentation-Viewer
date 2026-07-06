@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #aa3bff;
+  --color-background: #08060d;
+  --color-foreground: #f3f4f6;
+  --color-surface: #16171d;
+  --color-surface-hover: #1f2028;
+  --color-border: #2e303a;
+}
+
+@layer base {
+  :root {
+    --background: #08060d;
+    --foreground: #f3f4f6;
+    --surface: #16171d;
+  }
+  
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+}
+
+/* Hide scrollbar for the presentation viewer */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
