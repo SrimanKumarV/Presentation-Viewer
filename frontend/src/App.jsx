@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Navigate } from 'react-router-dom';
-import { Presentation, UploadCloud, Copy, Check, LogOut, Loader2, Play, Trash2, Share2, QrCode, X } from 'lucide-react';
+import { Presentation, UploadCloud, Copy, Check, LogOut, Loader2, Play, Trash2, Share2, QrCode, X, Search } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import PresentationViewer from './components/PresentationViewer';
 import Auth from './pages/Auth';
@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children }) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
@@ -37,6 +37,8 @@ function Dashboard() {
   const [loadingPresentations, setLoadingPresentations] = useState(true);
   const [activeQR, setActiveQR] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -118,7 +120,6 @@ function Dashboard() {
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
             const percentComplete = Math.round((event.loaded / event.total) * 100);
-            // Cap at 95% because server still needs time to process/convert after upload finishes
             setUploadProgress(percentComplete < 95 ? percentComplete : 95);
           }
         };
@@ -149,7 +150,7 @@ function Dashboard() {
       if (data.id) {
         const link = `${window.location.origin}/view/${data.id}`;
         setShareLink(link);
-        fetchPresentations(); // Refresh list after upload
+        fetchPresentations();
       } else {
         alert('Upload failed: ' + data.error);
       }
@@ -159,7 +160,6 @@ function Dashboard() {
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
-      // Reset input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -177,198 +177,212 @@ function Dashboard() {
     navigate('/auth');
   };
 
-  return (
-    <div className="min-h-screen bg-[#0a0a0a] text-foreground p-8 flex flex-col items-center relative overflow-hidden">
-      {/* Dynamic Background Glows */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] opacity-70 pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[150px] opacity-70 pointer-events-none" />
+  const filteredPresentations = presentations.filter(p => 
+    p.manifest?.title?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-      <header className="w-full max-w-5xl flex items-center justify-between py-6 mb-12 border-b border-border/50 relative z-10">
+  return (
+    <div className="min-h-screen bg-background text-foreground p-8 flex flex-col items-center relative overflow-hidden font-sans">
+      {/* Ambient Midnight Aurora Glows */}
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-primary/15 rounded-full blur-[140px] opacity-70 pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[800px] h-[800px] bg-secondary/10 rounded-full blur-[160px] opacity-70 pointer-events-none" />
+      <div className="absolute top-[40%] left-[30%] w-[400px] h-[400px] bg-accent/10 rounded-full blur-[120px] opacity-50 pointer-events-none" />
+
+      {/* Header */}
+      <header className="w-full max-w-6xl flex items-center justify-between py-6 mb-8 border-b border-white/5 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/20 rounded-lg border border-primary/50 shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.3)]">
+          <div className="p-2 bg-primary/10 rounded-xl border border-primary/30 glow-border">
             <Presentation className="text-primary w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-white glow-text font-heading">
             Nexus Viewer
           </h1>
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-gray-400 hidden sm:block">
-            {user?.email}
+        <div className="flex items-center gap-6">
+          <div className="relative hidden md:block">
+            <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input 
+              type="text" 
+              placeholder="Search presentations..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-4 py-2 bg-surface/80 backdrop-blur border border-border rounded-full text-sm text-white focus:outline-none focus:border-primary/50 w-64 transition-all focus:w-80 shadow-inner"
+            />
           </div>
-          <button 
-            onClick={handleLogout}
-            className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-lg text-gray-400 hover:text-white transition-colors"
-            title="Log Out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-4 border-l border-border pl-6">
+            <div className="text-sm font-medium text-gray-400 hidden sm:block">
+              {user?.email}
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-gray-400 hover:text-red-400 transition-colors"
+              title="Log Out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
+      <main className="w-full max-w-6xl flex flex-col gap-12 relative z-10">
         
-        {/* Upload Section (Left Column) */}
-        <section className="lg:col-span-1 flex flex-col gap-6">
+        {/* Full-width Upload Hero (Dropzone) */}
+        <section className="w-full">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-surface/60 backdrop-blur-md border border-border rounded-3xl p-8 shadow-2xl relative overflow-hidden"
+            className="glass-card rounded-3xl p-10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8"
           >
-            {/* Top gradient accent */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+            <div className="flex-1 text-left">
+              <h2 className="text-3xl font-bold text-white font-heading mb-3">Host your next big idea.</h2>
+              <p className="text-gray-400 max-w-md text-lg">Upload PowerPoint presentations and instantly turn them into ultra-fast, cross-platform interactive media players.</p>
+            </div>
 
-            <div 
-              onClick={!isUploading ? handleUploadClick : undefined}
-              className={`flex flex-col items-center justify-center text-center transition-all ${!isUploading ? 'cursor-pointer group' : 'opacity-80'}`}
-            >
-              <input 
-                type="file" 
-                accept=".pptx" 
-                className="hidden" 
-                ref={fileInputRef} 
-                onChange={handleFileChange}
-              />
-              
-              <div className={`w-20 h-20 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(var(--color-primary-rgb),0.1)] ${!isUploading && 'group-hover:scale-105 group-hover:bg-primary/20 group-hover:border-primary/50'} transition-all duration-300`}>
-                {isUploading ? (
-                  <div className="relative flex items-center justify-center w-full h-full">
-                    <Loader2 className="w-10 h-10 text-primary animate-spin opacity-20" />
-                    <span className="absolute text-primary font-bold text-sm">{uploadProgress}%</span>
+            <div className="flex-1 w-full max-w-md">
+              <div 
+                onClick={!isUploading ? handleUploadClick : undefined}
+                className={`w-full border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all bg-black/20 ${!isUploading ? 'border-primary/30 cursor-pointer hover:bg-primary/5 hover:border-primary/50' : 'border-border opacity-80'}`}
+              >
+                <input 
+                  type="file" 
+                  accept=".pptx" 
+                  className="hidden" 
+                  ref={fileInputRef} 
+                  onChange={handleFileChange}
+                />
+                
+                <div className={`w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 ${!isUploading && 'glow-border'} transition-all`}>
+                  {isUploading ? (
+                    <div className="relative flex items-center justify-center w-full h-full">
+                      <Loader2 className="w-8 h-8 text-primary animate-spin opacity-20" />
+                      <span className="absolute text-primary font-bold text-xs">{uploadProgress}%</span>
+                    </div>
+                  ) : (
+                    <UploadCloud className="w-8 h-8 text-primary" />
+                  )}
+                </div>
+                
+                <h3 className="font-semibold text-white mb-1">
+                  {isUploading ? (uploadProgress < 95 ? 'Uploading...' : 'Processing...') : 'Click to Upload (.pptx)'}
+                </h3>
+                
+                {isUploading && (
+                  <div className="w-full h-1.5 bg-black/50 rounded-full mt-3 overflow-hidden">
+                    <div className="h-full bg-primary transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
                   </div>
-                ) : (
-                  <UploadCloud className="w-10 h-10 text-primary" />
                 )}
               </div>
-              
-              <h2 className="text-xl font-semibold mb-2 text-white">
-                {isUploading ? (uploadProgress < 95 ? 'Uploading...' : 'Processing...') : 'Upload Presentation'}
-              </h2>
-              
-              {isUploading && (
-                <div className="w-full max-w-[80%] h-1.5 bg-black/50 rounded-full mt-2 mb-4 overflow-hidden border border-border">
-                  <div 
-                    className="h-full bg-primary transition-all duration-300 ease-out relative"
-                    style={{ width: `${uploadProgress}%` }}
-                  >
-                    <div className="absolute inset-0 bg-white/20 animate-pulse" />
-                  </div>
-                </div>
-              )}
-
-              <p className="text-sm text-gray-400">
-                {isUploading 
-                  ? 'Extracting heavy assets. Please wait.' 
-                  : 'Select a .pptx file. We will optimize it for global streaming.'}
-              </p>
-
-              {!isUploading && (
-                <button className="mt-8 w-full py-3 bg-primary/20 hover:bg-primary/30 text-primary font-medium rounded-xl transition-all border border-primary/50 group-hover:shadow-[0_0_20px_rgba(var(--color-primary-rgb),0.3)]">
-                  Select File
-                </button>
-              )}
             </div>
           </motion.div>
 
-          {/* Share Link Modal/Banner */}
+          {/* Share Link Banner */}
           {shareLink && (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="w-full p-5 bg-green-500/10 border border-green-500/30 rounded-2xl backdrop-blur-md"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="w-full mt-6 p-4 bg-green-500/10 border border-green-500/30 rounded-2xl flex items-center justify-between backdrop-blur-md"
             >
-              <p className="text-sm font-semibold text-green-400 mb-3">Upload complete! Share this link:</p>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <Check className="w-5 h-5 text-green-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-green-400">Upload complete!</p>
+                  <p className="text-sm text-green-200/70">Your presentation is now live.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
                 <input 
                   type="text" 
                   readOnly 
                   value={shareLink} 
-                  className="flex-1 bg-black/50 border border-green-500/30 p-2.5 rounded-lg text-sm text-green-100 outline-none"
+                  className="bg-black/50 border border-green-500/30 px-4 py-2 rounded-xl text-sm text-green-100 outline-none w-64"
                 />
-                <button 
-                  onClick={copyToClipboard}
-                  className="p-2.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg transition-colors"
-                >
-                  {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-green-400" />}
+                <button onClick={copyToClipboard} className="p-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-xl transition-colors">
+                  {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5 text-green-400" />}
+                </button>
+                <button onClick={() => window.open(shareLink, '_blank')} className="px-4 py-2 bg-green-500 hover:bg-green-600 text-black rounded-xl font-bold text-sm transition-colors">
+                  View Now
                 </button>
               </div>
-              <button 
-                onClick={() => window.open(shareLink, '_blank')}
-                className="w-full py-2.5 bg-green-500 hover:bg-green-600 text-black rounded-lg font-bold text-sm transition-colors"
-              >
-                View Now
-              </button>
             </motion.div>
           )}
         </section>
 
-        {/* User Presentations List (Right Column) */}
-        <section className="lg:col-span-2 flex flex-col gap-6">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-xl font-semibold text-white">Your Presentations</h3>
+        {/* Presentations Grid */}
+        <section className="w-full">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-white font-heading">Your Library</h3>
             <span className="text-sm font-medium text-primary px-3 py-1 bg-primary/10 rounded-full border border-primary/20">
-              {presentations.length} Total
+              {filteredPresentations.length} Items
             </span>
           </div>
           
           {loadingPresentations ? (
-            <div className="flex items-center justify-center p-12 border border-border/50 rounded-3xl bg-surface/30">
-              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map(n => (
+                <div key={n} className="glass rounded-2xl h-64 animate-pulse bg-white/5 border border-white/5" />
+              ))}
             </div>
           ) : presentations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-16 border border-dashed border-border rounded-3xl bg-surface/30 text-center">
-              <div className="w-16 h-16 bg-surface rounded-full flex items-center justify-center mb-4">
-                <Presentation className="w-8 h-8 text-gray-500" />
+            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border rounded-3xl bg-surface/30 text-center glass">
+              <div className="w-20 h-20 bg-surface rounded-full flex items-center justify-center mb-6">
+                <Presentation className="w-10 h-10 text-gray-500" />
               </div>
-              <h4 className="text-lg font-medium text-white mb-2">No presentations yet</h4>
-              <p className="text-sm text-gray-400 max-w-sm">
-                Upload your first presentation on the left to start hosting your media-rich slides on the cloud.
+              <h4 className="text-xl font-bold text-white font-heading mb-2">Library is empty</h4>
+              <p className="text-gray-400 max-w-sm">
+                Drop your first presentation above to start building your cloud library.
               </p>
             </div>
+          ) : filteredPresentations.length === 0 ? (
+            <div className="text-center py-10 text-gray-500">No presentations match your search.</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {presentations.map((p, i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredPresentations.map((p, i) => (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: i * 0.05 }}
                   key={p.id}
                   onClick={() => navigate(`/view/${p.id}`)}
-                  className="p-5 bg-surface/60 backdrop-blur-md border border-border rounded-2xl flex flex-col cursor-pointer hover:bg-surface-hover hover:border-primary/50 transition-all group overflow-hidden relative"
+                  className="p-3 glass rounded-2xl flex flex-col cursor-pointer hover:border-primary/50 transition-all group overflow-hidden relative shadow-lg"
                 >
-                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <button onClick={(e) => { e.stopPropagation(); setActiveQR(p.id); }} className="p-2 bg-black/60 hover:bg-primary/50 text-white rounded-lg backdrop-blur-md transition-colors border border-white/10" title="Show QR Code">
+                  {/* Action Bar */}
+                  <div className="absolute top-5 right-5 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <button onClick={(e) => { e.stopPropagation(); setActiveQR(p.id); }} className="p-2 bg-black/70 hover:bg-primary text-white rounded-xl backdrop-blur-md transition-colors shadow-lg" title="Show QR Code">
                       <QrCode className="w-4 h-4" />
                     </button>
-                    <button onClick={(e) => handleShare(p.id, e)} className="p-2 bg-black/60 hover:bg-green-500/50 text-white rounded-lg backdrop-blur-md transition-colors border border-white/10" title="Copy Link">
+                    <button onClick={(e) => handleShare(p.id, e)} className="p-2 bg-black/70 hover:bg-secondary text-white hover:text-black rounded-xl backdrop-blur-md transition-colors shadow-lg" title="Copy Link">
                       <Share2 className="w-4 h-4" />
                     </button>
-                    <button onClick={(e) => handleDelete(p.id, e)} disabled={deletingId === p.id} className="p-2 bg-black/60 hover:bg-red-500/50 text-white rounded-lg backdrop-blur-md transition-colors border border-white/10" title="Delete">
+                    <button onClick={(e) => handleDelete(p.id, e)} disabled={deletingId === p.id} className="p-2 bg-black/70 hover:bg-red-500 text-white rounded-xl backdrop-blur-md transition-colors shadow-lg" title="Delete">
                       {deletingId === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                     </button>
                   </div>
                   
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
-                  <div className="w-full aspect-[16/9] bg-black/50 rounded-xl overflow-hidden relative mb-4 border border-border/50 group-hover:border-primary/30 transition-colors">
+                  {/* Thumbnail Image */}
+                  <div className="w-full aspect-[16/9] bg-black rounded-xl overflow-hidden relative mb-4 border border-white/5">
                     {p.manifest?.slides?.[0]?.image ? (
-                      <img src={p.manifest.slides[0].image} alt="thumbnail" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                      <img src={p.manifest.slides[0].image} alt="thumbnail" className="w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 ease-out" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-600">
+                      <div className="w-full h-full flex items-center justify-center text-gray-700">
                         <Presentation className="w-10 h-10" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm">
-                      <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white shadow-lg transform scale-50 group-hover:scale-100 transition-transform duration-300">
-                        <Play className="w-5 h-5 ml-1" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[2px]">
+                      <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-black shadow-[0_0_20px_rgba(0,240,255,0.5)] transform scale-50 group-hover:scale-100 transition-transform duration-300">
+                        <Play className="w-6 h-6 ml-1 fill-black" />
                       </div>
                     </div>
                   </div>
-                  <div className="relative z-10">
-                    <h4 className="font-semibold text-white truncate text-lg">{p.manifest?.title || 'Untitled'}</h4>
+
+                  {/* Meta */}
+                  <div className="px-2 pb-2 relative z-10">
+                    <h4 className="font-bold text-white truncate text-lg font-heading">{p.manifest?.title || 'Untitled'}</h4>
                     <p className="text-sm text-gray-400 mt-1 flex items-center gap-2">
-                      <span>{p.manifest?.slides?.length || 0} Slides</span>
+                      <span className="w-2 h-2 rounded-full bg-secondary glow-border"></span>
+                      {p.manifest?.slides?.length || 0} Slides
                     </p>
                   </div>
                 </motion.div>
@@ -380,25 +394,25 @@ function Dashboard() {
 
       {/* QR Code Modal */}
       {activeQR && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setActiveQR(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => setActiveQR(null)}>
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface/90 backdrop-blur-xl border border-border p-8 rounded-3xl flex flex-col items-center shadow-2xl relative max-w-sm w-full"
+            className="glass-card p-10 rounded-[2rem] flex flex-col items-center shadow-2xl relative max-w-sm w-full border border-primary/30"
           >
-            <button onClick={() => setActiveQR(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+            <button onClick={() => setActiveQR(null)} className="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors bg-surface/50 p-2 rounded-full">
               <X className="w-5 h-5" />
             </button>
-            <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20 mb-4">
-              <QrCode className="text-primary w-6 h-6" />
+            <div className="p-4 bg-primary/10 rounded-2xl border border-primary/30 mb-6 glow-border">
+              <QrCode className="text-primary w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-6">Scan to View</h3>
-            <div className="p-4 bg-white rounded-xl mb-6 shadow-inner">
-              <QRCodeSVG value={`${window.location.origin}/view/${activeQR}`} size={200} level="H" />
+            <h3 className="text-2xl font-bold text-white font-heading mb-6 glow-text">Scan to View</h3>
+            <div className="p-5 bg-white rounded-2xl mb-8 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+              <QRCodeSVG value={`${window.location.origin}/view/${activeQR}`} size={220} level="H" />
             </div>
-            <p className="text-sm text-gray-400 text-center">
-              Scan this QR code with any mobile device to open the presentation instantly. No app required.
+            <p className="text-sm text-gray-300 text-center leading-relaxed">
+              Scan this QR code with your mobile device to open the presentation instantly.
             </p>
           </motion.div>
         </div>

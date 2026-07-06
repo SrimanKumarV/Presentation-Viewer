@@ -118,6 +118,32 @@ app.post('/api/upload', authenticateToken, upload.single('presentation'), async 
         // 3. Map videos to slides and upload EVERYTHING to Supabase
         const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
         let slides = [];
+        
+        // Parse presentation.xml to get accurate slide order
+        let slideOrderMapping = [];
+        try {
+          const presentationXml = fs.readFileSync(path.join(rawDir, 'ppt', 'presentation.xml'), 'utf8');
+          const presentationRels = fs.readFileSync(path.join(rawDir, 'ppt', '_rels', 'presentation.xml.rels'), 'utf8');
+          
+          const parsedPres = parser.parse(presentationXml);
+          const parsedRels = parser.parse(presentationRels);
+          
+          let sldIdLst = parsedPres['p:presentation']['p:sldIdLst']['p:sldId'];
+          if (!Array.isArray(sldIdLst)) sldIdLst = [sldIdLst];
+          
+          let rels = parsedRels.Relationships.Relationship;
+          if (!Array.isArray(rels)) rels = [rels];
+          
+          for (let sld of sldIdLst) {
+            const rId = sld['@_r:id'];
+            const rel = rels.find(r => r['@_Id'] === rId);
+            if (rel && rel['@_Target']) {
+              slideOrderMapping.push(path.basename(rel['@_Target'])); // e.g. "slide3.xml"
+            }
+          }
+        } catch (e) {
+          console.error('Failed to parse presentation XML for slide ordering', e);
+        }
 
         let exportedImages = fs.readdirSync(slidesDir).filter(f => f.toLowerCase().endsWith('.jpg') || f.toLowerCase().endsWith('.png'));
         
@@ -143,8 +169,14 @@ app.post('/api/upload', authenticateToken, upload.single('presentation'), async 
             video: null
           };
 
-          // Check for video relationship
-          const relPath = path.join(rawDir, 'ppt', 'slides', '_rels', `slide${slideNum}.xml.rels`);
+          // Check for video relationship using robust mapping
+          let slideXmlFilename = `slide${slideNum}.xml`; // fallback
+          if (slideOrderMapping[i]) {
+            slideXmlFilename = slideOrderMapping[i];
+          }
+          const slideBaseName = slideXmlFilename.replace('.xml', '');
+          const relPath = path.join(rawDir, 'ppt', 'slides', '_rels', `${slideBaseName}.xml.rels`);
+          
           if (fs.existsSync(relPath)) {
             const xmlData = fs.readFileSync(relPath, 'utf8');
             try {

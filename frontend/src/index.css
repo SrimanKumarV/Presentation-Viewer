@@ -1,29 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #aa3bff;
-  --color-background: #08060d;
-  --color-foreground: #f3f4f6;
-  --color-surface: #16171d;
-  --color-surface-hover: #1f2028;
-  --color-border: #2e303a;
+  --color-primary: #00F0FF; /* Cyan glow */
+  --color-secondary: #00FF87; /* Emerald glow */
+  --color-accent: #7B2CBF; /* Deep violet */
+  
+  --color-background: #030108; /* Midnight pitch black */
+  --color-foreground: #F8F9FA;
+  
+  --color-surface: #0A0713;
+  --color-surface-hover: #141026;
+  --color-border: #1F193B;
+  
+  --font-sans: 'Inter', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
 }
 
 @layer base {
   :root {
-    --background: #08060d;
-    --foreground: #f3f4f6;
-    --surface: #16171d;
+    --background: #030108;
+    --foreground: #F8F9FA;
+    --surface: #0A0713;
   }
   
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: var(--font-sans);
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(10, 7, 19, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-card {
+  background: linear-gradient(145deg, rgba(20, 16, 38, 0.8), rgba(10, 7, 19, 0.4));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 240, 255, 0.1);
+}
+
+/* Glowing utilities */
+.glow-text {
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+}
+
+.glow-border {
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
 }
 
 /* Hide scrollbar for the presentation viewer */

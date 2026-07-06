@@ -37,10 +37,10 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-foreground flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4 relative overflow-hidden">
       {/* Dynamic Background Glows */}
       <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] opacity-70 pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[150px] opacity-70 pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[150px] opacity-70 pointer-events-none" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -48,12 +48,12 @@ export default function Auth() {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="w-full max-w-md"
       >
-        <div className="bg-surface/50 backdrop-blur-xl border border-border rounded-3xl p-8 shadow-2xl relative z-10 overflow-hidden">
+        <div className="glass-card rounded-3xl p-8 shadow-2xl relative z-10 overflow-hidden">
           {/* Subtle top gradient line */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
 
           <div className="flex flex-col items-center mb-8">
-            <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20 mb-4 shadow-[0_0_20px_rgba(var(--color-primary-rgb),0.2)]">
+            <div className="p-3 bg-primary/10 rounded-2xl border border-primary/30 mb-4 glow-border">
               <Presentation className="text-primary w-8 h-8" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-white mb-1">
@@ -86,7 +86,7 @@ export default function Auth() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-black/40 border border-border text-white rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-gray-600"
+                  className="w-full bg-surface/50 border border-border text-white rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-gray-600 shadow-inner"
                   placeholder="you@example.com"
                 />
               </div>
@@ -103,7 +103,7 @@ export default function Auth() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-black/40 border border-border text-white rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-gray-600"
+                  className="w-full bg-surface/50 border border-border text-white rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-gray-600 shadow-inner"
                   placeholder="••••••••"
                 />
               </div>
