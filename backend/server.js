@@ -186,7 +186,7 @@ app.post('/api/upload', authenticateToken, upload.single('presentation'), async 
 
       } catch (cloudErr) {
         console.error('Cloud Sync Error:', cloudErr);
-        res.status(500).json({ error: 'Failed to sync with cloud storage' });
+        res.status(500).json({ error: `Failed to sync with cloud storage: ${cloudErr.message || JSON.stringify(cloudErr)}` });
       }
     });
   } catch (err) {
