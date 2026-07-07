@@ -525,6 +525,16 @@ function ViewerWrapper() {
 }
 
 function App() {
+  useEffect(() => {
+    // Keep backend server awake on Render free tier
+    const pingServer = () => fetch('/api/health').catch(() => {});
+    pingServer(); // Initial ping
+    
+    // Ping every 5 minutes
+    const interval = setInterval(pingServer, 5 * 60 * 1000); 
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <AuthProvider>
       <Router>

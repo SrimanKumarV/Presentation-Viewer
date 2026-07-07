@@ -295,6 +295,11 @@ app.get('/api/presentation/:id', async (req, res) => {
   res.json(data.manifest);
 });
 
+// API: Health check to keep server awake on Render
+app.get('/api/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Serve React Frontend (We no longer need to serve static media because it's on Supabase!)
 const frontendDist = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendDist));
